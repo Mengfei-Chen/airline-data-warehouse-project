@@ -305,5 +305,25 @@ SELECT passenger_count, COUNT(*) AS cnt
 FROM fact_flight
 GROUP BY passenger_count;
 
+--不同 Flight Status 的总体分布
+SELECT
+    fs.flight_status,
+    SUM(f.passenger_count) AS total_records
+FROM fact_flight f
+JOIN dim_flight_status fs
+    ON f.status_key = fs.status_key
+GROUP BY fs.flight_status
+ORDER BY total_records DESC;
 
+--交叉检查
+SELECT SUM(total_records) AS grand_total
+FROM (
+    SELECT
+        fs.flight_status,
+        SUM(f.passenger_count) AS total_records
+    FROM fact_flight f
+    JOIN dim_flight_status fs
+        ON f.status_key = fs.status_key
+    GROUP BY fs.flight_status
+) t;
 
