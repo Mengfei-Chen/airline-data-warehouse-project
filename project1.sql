@@ -305,6 +305,7 @@ SELECT passenger_count, COUNT(*) AS cnt
 FROM fact_flight
 GROUP BY passenger_count;
 
+--第一个业务查询
 --不同 Flight Status 的总体分布
 SELECT
     fs.flight_status,
@@ -326,4 +327,28 @@ FROM (
         ON f.status_key = fs.status_key
     GROUP BY fs.flight_status
 ) t;
+
+--第二个业务查询
+--洲际级航班状态分析查询
+SELECT
+    da.continent_name,
+    fs.flight_status,
+    SUM(f.passenger_count) AS total_records
+FROM fact_flight f
+JOIN dim_departure_airport da
+    ON f.departure_airport_key = da.departure_airport_key
+JOIN dim_flight_status fs
+    ON f.status_key = fs.status_key
+GROUP BY da.continent_name, fs.flight_status
+ORDER BY da.continent_name, total_records DESC;
+
+--检查
+SELECT
+    da.continent_name,
+    SUM(f.passenger_count) AS continent_total
+FROM fact_flight f
+JOIN dim_departure_airport da
+    ON f.departure_airport_key = da.departure_airport_key
+GROUP BY da.continent_name
+ORDER BY continent_total DESC;
 
