@@ -353,7 +353,7 @@ GROUP BY da.continent_name
 ORDER BY continent_total DESC;
 
 --第三个业务查询
---按月分析航班状态
+--按月分析航班状态分布
 SELECT
     d.month,
     TRIM(d.month_name) AS month_name,
@@ -377,3 +377,27 @@ JOIN dim_date d
     ON f.date_key = d.date_key
 GROUP BY d.month, TRIM(d.month_name)
 ORDER BY d.month;
+
+--第四个业务查询
+--按年龄组分析航班状态分布
+SELECT
+    p.age_group,
+    fs.flight_status,
+    SUM(f.passenger_count) AS total_records
+FROM fact_flight f
+JOIN dim_passenger p
+    ON f.passenger_key = p.passenger_key
+JOIN dim_flight_status fs
+    ON f.status_key = fs.status_key
+GROUP BY p.age_group, fs.flight_status
+ORDER BY p.age_group, fs.flight_status；
+
+--总量检查
+SELECT
+    p.age_group,
+    SUM(f.passenger_count) AS age_group_total
+FROM fact_flight f
+JOIN dim_passenger p
+    ON f.passenger_key = p.passenger_key
+GROUP BY p.age_group
+ORDER BY age_group_total DESC;
