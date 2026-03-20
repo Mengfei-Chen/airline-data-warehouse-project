@@ -401,3 +401,55 @@ JOIN dim_passenger p
     ON f.passenger_key = p.passenger_key
 GROUP BY p.age_group
 ORDER BY age_group_total DESC;
+
+--第五个业务查询
+--先做 Top 10 出发机场总量
+SELECT
+    da.airport_name,
+    da.country_name,
+    da.continent_name,
+    SUM(f.passenger_count) AS total_records
+FROM fact_flight f
+JOIN dim_departure_airport da
+    ON f.departure_airport_key = da.departure_airport_key
+GROUP BY da.airport_name, da.country_name, da.continent_name
+ORDER BY total_records DESC
+LIMIT 10;
+
+--然后做 Top 10 机场的 flight status 分布
+WITH top_airports AS (
+    SELECT
+        da.airport_name,
+        da.country_name,
+        da.continent_name,
+        SUM(f.passenger_count) AS total_records
+    FROM fact_flight f
+    JOIN dim_departure_airport da
+        ON f.departure_airport_key = da.departure_airport_key
+    GROUP BY da.airport_name, da.country_name, da.continent_name
+    ORDER BY total_records DESC
+    LIMIT 10
+)
+SELECT
+    ta.airport_name,
+    ta.country_name,
+    ta.continent_name,
+    fs.flight_status,
+    SUM(f.passenger_count) AS status_records
+FROM fact_flight f
+JOIN dim_departure_airport da
+    ON f.departure_airport_key = da.departure_airport_key
+JOIN dim_flight_status fs
+    ON f.status_key = fs.status_key
+JOIN top_airports ta
+    ON da.airport_name = ta.airport_name
+   AND da.country_name = ta.country_name
+   AND da.continent_name = ta.continent_name
+GROUP BY
+    ta.airport_name,
+    ta.country_name,
+    ta.continent_name,
+    fs.flight_status
+ORDER BY
+    ta.airport_name,
+    fs.flight_status;
