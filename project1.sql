@@ -352,3 +352,28 @@ JOIN dim_departure_airport da
 GROUP BY da.continent_name
 ORDER BY continent_total DESC;
 
+--第三个业务查询
+--按月分析航班状态
+SELECT
+    d.month,
+    TRIM(d.month_name) AS month_name,
+    fs.flight_status,
+    SUM(f.passenger_count) AS total_records
+FROM fact_flight f
+JOIN dim_date d
+    ON f.date_key = d.date_key
+JOIN dim_flight_status fs
+    ON f.status_key = fs.status_key
+GROUP BY d.month, TRIM(d.month_name), fs.flight_status
+ORDER BY d.month, fs.flight_status;
+
+--总量检查
+SELECT
+    d.month,
+    TRIM(d.month_name) AS month_name,
+    SUM(f.passenger_count) AS month_total
+FROM fact_flight f
+JOIN dim_date d
+    ON f.date_key = d.date_key
+GROUP BY d.month, TRIM(d.month_name)
+ORDER BY d.month;
