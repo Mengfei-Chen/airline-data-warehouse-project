@@ -453,3 +453,36 @@ GROUP BY
 ORDER BY
     ta.airport_name,
     fs.flight_status;
+
+
+--准备 Python 输入数据，并导出给 Python 使用。
+--创建一个 view
+DROP VIEW IF EXISTS vw_association_mining_input;
+
+CREATE VIEW vw_association_mining_input AS
+SELECT
+    f.flight_fact_key,
+    p.gender,
+    p.age_group,
+    p.nationality,
+    da.continent_name,
+    TRIM(d.month_name) AS month_name,
+    fs.flight_status
+FROM fact_flight f
+JOIN dim_passenger p
+    ON f.passenger_key = p.passenger_key
+JOIN dim_departure_airport da
+    ON f.departure_airport_key = da.departure_airport_key
+JOIN dim_date d
+    ON f.date_key = d.date_key
+JOIN dim_flight_status fs
+    ON f.status_key = fs.status_key;
+
+--检查总行数
+SELECT COUNT(*) AS mining_row_count
+FROM vw_association_mining_input;
+
+--检查前几行
+SELECT *
+FROM vw_association_mining_input
+LIMIT 10;
