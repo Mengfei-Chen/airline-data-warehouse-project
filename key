@@ -1,0 +1,49 @@
+-- ① 主键
+ALTER TABLE dim_date
+    ADD PRIMARY KEY (date_key);
+
+ALTER TABLE dim_passenger
+    ADD PRIMARY KEY (passenger_key);
+
+ALTER TABLE dim_departure_airport
+    ADD PRIMARY KEY (departure_airport_key);
+
+ALTER TABLE dim_arrival_airport
+    ADD PRIMARY KEY (arrival_airport_key);
+
+ALTER TABLE dim_pilot
+    ADD PRIMARY KEY (pilot_key);
+
+ALTER TABLE dim_flight_status
+    ADD PRIMARY KEY (status_key);
+
+ALTER TABLE fact_flight
+    ADD PRIMARY KEY (flight_fact_key);
+
+-- ② 外键（fact → dim）
+ALTER TABLE fact_flight
+    ADD CONSTRAINT fk_passenger
+        FOREIGN KEY (passenger_key)         REFERENCES dim_passenger(passenger_key),
+    ADD CONSTRAINT fk_date
+        FOREIGN KEY (date_key)              REFERENCES dim_date(date_key),
+    ADD CONSTRAINT fk_departure_airport
+        FOREIGN KEY (departure_airport_key) REFERENCES dim_departure_airport(departure_airport_key),
+    ADD CONSTRAINT fk_arrival_airport
+        FOREIGN KEY (arrival_airport_key)   REFERENCES dim_arrival_airport(arrival_airport_key),
+    ADD CONSTRAINT fk_pilot
+        FOREIGN KEY (pilot_key)             REFERENCES dim_pilot(pilot_key),
+    ADD CONSTRAINT fk_status
+        FOREIGN KEY (status_key)            REFERENCES dim_flight_status(status_key);
+
+-- ③ 验证所有约束都建好了
+SELECT
+    tc.table_name,
+    tc.constraint_name,
+    tc.constraint_type
+FROM information_schema.table_constraints tc
+WHERE tc.table_name IN (
+    'fact_flight','dim_passenger','dim_date',
+    'dim_departure_airport','dim_arrival_airport',
+    'dim_pilot','dim_flight_status'
+)
+ORDER BY tc.table_name, tc.constraint_type;
